@@ -47,6 +47,10 @@ namespace ManagedFusion.Rewriter.Contrib
 					string url = match.Groups["url"].Value;
 					string name = match.Groups["name"].Value;
 
+					if (String.IsNullOrEmpty(name))
+						name =  Guid.NewGuid().ToString("N");
+
+					//Route route = new Route(url, new MvcContrib.Routing.DebugRouteHandler()) {
 					Route route = new Route(url, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
 						Constraints = new RouteValueDictionary(constraints)
