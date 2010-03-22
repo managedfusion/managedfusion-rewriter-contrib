@@ -17,6 +17,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		private static readonly Regex RouteDefaultLine = new Regex(@"^RouteDefault[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteConstraintLine = new Regex(@"^RouteConstraint[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteNamespaceLine = new Regex(@"^RouteNamespace[\s]+(?<namespace>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoutingApacheRuleSet"/> class.
@@ -48,7 +49,7 @@ namespace ManagedFusion.Rewriter.Contrib
 					string name = match.Groups["name"].Value;
 
 					if (String.IsNullOrEmpty(name))
-						name =  Guid.NewGuid().ToString("N");
+						name = Guid.NewGuid().ToString("N");
 
 					//Route route = new Route(url, new MvcContrib.Routing.DebugRouteHandler()) {
 					Route route = new Route(url, new MvcRouteHandler()) {
@@ -63,6 +64,21 @@ namespace ManagedFusion.Rewriter.Contrib
 					}
 
 					routes.Add(name, route);
+
+					defaults.Clear();
+					constraints.Clear();
+					namespaces.Clear();
+				}
+				else if (RouteIgnoreUrlLine.IsMatch(line))
+				{
+					Match match = RouteIgnoreUrlLine.Match(line);
+					string url = match.Groups["url"].Value;
+
+					Route route = new IgnoreRouteInternal(url) {
+						Constraints = new RouteValueDictionary(constraints)
+					};
+
+					routes.Add(route);
 
 					defaults.Clear();
 					constraints.Clear();
@@ -98,6 +114,19 @@ namespace ManagedFusion.Rewriter.Contrib
 			}
 
 			lines = unknownLines;
+		}
+
+		private sealed class IgnoreRouteInternal : Route
+		{
+			public IgnoreRouteInternal(string url)
+				: base(url, new StopRoutingHandler()) { }
+
+			public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary routeValues)
+			{
+				// Never match during route generation. This avoids the scenario where an IgnoreRoute with
+				// fairly relaxed constraints ends up eagerly matching all generated URLs.
+				return null;
+			}
 		}
 	}
 }
