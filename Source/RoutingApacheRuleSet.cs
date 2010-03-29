@@ -18,6 +18,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		private static readonly Regex RouteConstraintLine = new Regex(@"^RouteConstraint[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteNamespaceLine = new Regex(@"^RouteNamespace[\s]+(?<namespace>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteAreaLine = new Regex(@"^RouteArea[\s]+(?<area>[\S]+)[\s]*", FileOptions);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoutingApacheRuleSet"/> class.
@@ -35,6 +36,7 @@ namespace ManagedFusion.Rewriter.Contrib
 			// TODO: find a way to remove just the routes from the current ruleset not all of them
 			routes.Clear();
 
+			string areaName = null;
 			IList<string> unknownLines = new List<string>();
 			IDictionary<string, object> defaults = new Dictionary<string, object>();
 			IDictionary<string, object> constraints = new Dictionary<string, object>();
@@ -54,17 +56,28 @@ namespace ManagedFusion.Rewriter.Contrib
 					//Route route = new Route(url, new MvcContrib.Routing.DebugRouteHandler()) {
 					Route route = new Route(url, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
-						Constraints = new RouteValueDictionary(constraints)
+						Constraints = new RouteValueDictionary(constraints),
+						DataTokens = new RouteValueDictionary()
 					};
 
 					if ((namespaces != null) && (namespaces.Count > 0))
 					{
-						route.DataTokens = new RouteValueDictionary();
 						route.DataTokens["Namespaces"] = namespaces.ToArray();
+					}
+
+					if (areaName != null && areaName.Trim().Length > 0)
+					{
+						route.DataTokens["area"] = areaName;
+
+						// disabling the namespace lookup fallback mechanism keeps this areas from accidentally picking up
+						// controllers belonging to other areas
+						bool useNamespaceFallback = (namespaces == null || namespaces.Count == 0);
+						route.DataTokens["UseNamespaceFallback"] = useNamespaceFallback;
 					}
 
 					routes.Add(name, route);
 
+					areaName = null;
 					defaults.Clear();
 					constraints.Clear();
 					namespaces.Clear();
@@ -106,6 +119,11 @@ namespace ManagedFusion.Rewriter.Contrib
 					string ns = match.Groups["namespace"].Value;
 
 					namespaces.Add(ns);
+				}
+				else if (RouteAreaLine.IsMatch(line))
+				{
+					Match match = RouteAreaLine.Match(line);
+					areaName = match.Groups["area"].Value;
 				}
 				else
 				{
