@@ -14,7 +14,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		private static readonly RegexOptions FileOptions = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant;
 
 		private static readonly Regex RouteUrlLine = new Regex(@"^RouteUrl[\s]+(?<url>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*", FileOptions);
-		private static readonly Regex RouteDefaultLine = new Regex(@"^RouteDefault[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteDefaultLine = new Regex(@"^RouteDefault[\s]+(?<name>[\S]+)[\s]+""?(?<value>[\S]*)""?[\s]*", FileOptions);
 		private static readonly Regex RouteConstraintLine = new Regex(@"^RouteConstraint[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteNamespaceLine = new Regex(@"^RouteNamespace[\s]+(?<namespace>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
