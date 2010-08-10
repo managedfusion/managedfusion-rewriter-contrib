@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion.Rewriter.Contrib", "Source\ManagedFusion.Rewriter.Contrib.csproj", "{637C22D0-ED49-476F-A13B-3EBE716D99DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion.Rewriter", "..\ManagedFusion.Rewriter\Source\ManagedFusion.Rewriter.csproj", "{4C655AE4-83F4-4A0F-BFC0-95689A50BCDD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{637C22D0-ED49-476F-A13B-3EBE716D99DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{637C22D0-ED49-476F-A13B-3EBE716D99DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{637C22D0-ED49-476F-A13B-3EBE716D99DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{637C22D0-ED49-476F-A13B-3EBE716D99DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C655AE4-83F4-4A0F-BFC0-95689A50BCDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C655AE4-83F4-4A0F-BFC0-95689A50BCDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C655AE4-83F4-4A0F-BFC0-95689A50BCDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C655AE4-83F4-4A0F-BFC0-95689A50BCDD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
