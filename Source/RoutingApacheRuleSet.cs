@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Web.Routing;
@@ -9,9 +8,9 @@ using System.Web.Mvc;
 
 namespace ManagedFusion.Rewriter.Contrib
 {
-	public class RoutingApacheRuleSet : ManagedFusion.Rewriter.Engines.ApacheRuleSet
+	public class RoutingApacheRuleSet : Engines.ApacheRuleSet
 	{
-		private static readonly RegexOptions FileOptions = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant;
+		private const RegexOptions FileOptions = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant;
 
 		private static readonly Regex RouteUrlLine = new Regex(@"^RouteUrl[\s]+(?<url>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*", FileOptions);
 		private static readonly Regex RouteDefaultLine = new Regex(@"^RouteDefault[\s]+(?<name>[\S]+)[\s]+""?(?<value>[\S]*)""?[\s]*", FileOptions);
@@ -54,16 +53,14 @@ namespace ManagedFusion.Rewriter.Contrib
 						name = Guid.NewGuid().ToString("N");
 
 					//Route route = new Route(url, new MvcContrib.Routing.DebugRouteHandler()) {
-					Route route = new Route(url, new MvcRouteHandler()) {
+					var route = new Route(url, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
 						Constraints = new RouteValueDictionary(constraints),
 						DataTokens = new RouteValueDictionary()
 					};
 
-					if ((namespaces != null) && (namespaces.Count > 0))
-					{
+					if (namespaces.Count > 0)
 						route.DataTokens["Namespaces"] = namespaces.ToArray();
-					}
 
 					if (areaName != null && areaName.Trim().Length > 0)
 					{
@@ -71,7 +68,7 @@ namespace ManagedFusion.Rewriter.Contrib
 
 						// disabling the namespace lookup fallback mechanism keeps this areas from accidentally picking up
 						// controllers belonging to other areas
-						bool useNamespaceFallback = (namespaces == null || namespaces.Count == 0);
+						bool useNamespaceFallback = (namespaces.Count == 0);
 						route.DataTokens["UseNamespaceFallback"] = useNamespaceFallback;
 					}
 
@@ -101,7 +98,10 @@ namespace ManagedFusion.Rewriter.Contrib
 				{
 					Match match = RouteDefaultLine.Match(line);
 					string name = match.Groups["name"].Value;
-					string value = match.Groups["value"].Value;
+					object value = match.Groups["value"].Value;
+
+					if (String.Equals(value, "?"))
+						value = UrlParameter.Optional;
 
 					defaults.Add(name, value);
 				}
