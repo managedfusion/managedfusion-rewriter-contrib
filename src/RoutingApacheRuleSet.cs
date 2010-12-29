@@ -18,6 +18,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		private static readonly Regex RouteNamespaceLine = new Regex(@"^RouteNamespace[\s]+(?<namespace>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteAreaLine = new Regex(@"^RouteArea[\s]+(?<area>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteDataTokenLine = new Regex(@"^RouteDataToken[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoutingApacheRuleSet"/> class.
@@ -39,6 +40,7 @@ namespace ManagedFusion.Rewriter.Contrib
 			IList<string> unknownLines = new List<string>();
 			IDictionary<string, object> defaults = new Dictionary<string, object>();
 			IDictionary<string, object> constraints = new Dictionary<string, object>();
+			IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 			IList<string> namespaces = new List<string>();
 
 			foreach (var line in lines)
@@ -56,7 +58,7 @@ namespace ManagedFusion.Rewriter.Contrib
 					var route = new Route(url, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
 						Constraints = new RouteValueDictionary(constraints),
-						DataTokens = new RouteValueDictionary()
+						DataTokens = new RouteValueDictionary(dataTokens)
 					};
 
 					if (namespaces.Count > 0)
@@ -112,6 +114,14 @@ namespace ManagedFusion.Rewriter.Contrib
 					string value = match.Groups["value"].Value;
 
 					constraints.Add(name, value);
+				}
+				else if (RouteDataTokenLine.IsMatch(line))
+				{
+					Match match = RouteDataTokenLine.Match(line);
+					string name = match.Groups["name"].Value;
+					string value = match.Groups["value"].Value;
+
+					dataTokens.Add(name, value);
 				}
 				else if (RouteNamespaceLine.IsMatch(line))
 				{
