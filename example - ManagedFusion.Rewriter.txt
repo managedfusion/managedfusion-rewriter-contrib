@@ -1,0 +1,22 @@
+# Route Engine Examples
+#    Web.config
+#	<managedFusion.rewriter xmlns="http://managedfusion.com/xsd/managedFusion/rewriter">
+#		<rules engine="Other" engineType="ManagedFusion.Rewriter.Contrib.RoutingApacheEngine, ManagedFusion.Rewriter.Contrib" />
+#	</managedFusion.rewriter>
+
+RouteIgnoreUrl {resource}.axd/{*pathInfo}
+
+# Adding An Area
+
+RouteArea Admin
+RouteNamespace SomeApp.Web.Areas.Admin.Controllers
+RouteDefault controller Home
+RouteDefault action Index
+RouteUrl admin/{controller}/{action}/{id}
+
+# Standard Route
+
+RouteDefault controller Home
+RouteDefault action Index
+RouteNamespace SomeApp.Web.Controllers
+RouteUrl {controller}/{action}/{id}
