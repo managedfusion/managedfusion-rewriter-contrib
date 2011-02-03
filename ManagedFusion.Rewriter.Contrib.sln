@@ -3,14 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion.Rewriter.Contrib", "src\ManagedFusion.Rewriter.Contrib.csproj", "{637C22D0-ED49-476F-A13B-3EBE716D99DF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{293CE89E-5DD7-49CC-8CEC-D2E6E2B53F22}"
-	ProjectSection(SolutionItems) = preProject
-		nuget\ManagedFusion.Rewriter.Contrib.nuspec = nuget\ManagedFusion.Rewriter.Contrib.nuspec
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D5DCC0C-55E3-4A93-9E2F-9F572CF38690}"
 	ProjectSection(SolutionItems) = preProject
 		ManagedFusion.Rewriter.Contrib.msbuild = ManagedFusion.Rewriter.Contrib.msbuild
+		nuget\ManagedFusion.Rewriter.Contrib.nuspec = nuget\ManagedFusion.Rewriter.Contrib.nuspec
 	EndProjectSection
 EndProject
 Global
