@@ -57,11 +57,11 @@
 		<MSBuild Projects="@(MainProjects)" Targets="Rebuild" />
 	</Target>
 
-	<Target Name="Package" DependsOnTargets="Test">
+	<Target Name="Package" DependsOnTargets="Build">
 		<TeamCityProgressMessage Text="Packaging NuGet" />
 
 		<ItemGroup>
-			<AssembliesToPackage Include="src\bin\**\*.dll" />
+			<AssembliesToPackage Include="src\bin\**\ManagedFusion.Rewriter.Contrib.dll" />
 		</ItemGroup>
 
 		<RemoveDir Directories="$(PackagePath)\lib" />
