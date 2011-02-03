@@ -5,6 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedFusion.Rewriter.Cont
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D5DCC0C-55E3-4A93-9E2F-9F572CF38690}"
 	ProjectSection(SolutionItems) = preProject
+		example - ManagedFusion.Rewriter.txt = example - ManagedFusion.Rewriter.txt
 		ManagedFusion.Rewriter.Contrib.msbuild = ManagedFusion.Rewriter.Contrib.msbuild
 		nuget\ManagedFusion.Rewriter.Contrib.nuspec = nuget\ManagedFusion.Rewriter.Contrib.nuspec
 	EndProjectSection
