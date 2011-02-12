@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Web.Routing;
 using System.Web.Mvc;
+using ManagedFusion.Rewriter.Conditions;
 
 namespace ManagedFusion.Rewriter.Contrib
 {
@@ -12,13 +13,14 @@ namespace ManagedFusion.Rewriter.Contrib
 	{
 		private const RegexOptions FileOptions = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant;
 
-		private static readonly Regex RouteUrlLine = new Regex(@"^RouteUrl[\s]+(?<url>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*", FileOptions);
+		private static readonly Regex RouteUrlLine = new Regex(@"^RouteUrl[\s]+(?<url>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*(\[(?<flags>[\s\w][^\]]*)\])?", FileOptions);
 		private static readonly Regex RouteDefaultLine = new Regex(@"^RouteDefault[\s]+(?<name>[\S]+)[\s]+""?(?<value>[\S]*)""?[\s]*", FileOptions);
 		private static readonly Regex RouteConstraintLine = new Regex(@"^RouteConstraint[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteNamespaceLine = new Regex(@"^RouteNamespace[\s]+(?<namespace>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteAreaLine = new Regex(@"^RouteArea[\s]+(?<area>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteDataTokenLine = new Regex(@"^RouteDataToken[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteGroupLine = new Regex(@"^RouteGroup[\s]+(?<pattern>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*(\[(?<flags>[\s\w][^\]]*)\])?", FileOptions);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoutingApacheRuleSet"/> class.
@@ -42,6 +44,7 @@ namespace ManagedFusion.Rewriter.Contrib
 			IDictionary<string, object> constraints = new Dictionary<string, object>();
 			IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 			IList<string> namespaces = new List<string>();
+			RouteCollection groupRoutes = new RouteCollection();
 
 			foreach (var line in lines)
 			{
@@ -50,12 +53,12 @@ namespace ManagedFusion.Rewriter.Contrib
 					Match match = RouteUrlLine.Match(line);
 					string url = match.Groups["url"].Value;
 					string name = match.Groups["name"].Value;
+					string[] flags = (match.Groups["flags"].Value ?? "").Split(',').Select(x => x.Trim()).ToArray();
 
 					if (String.IsNullOrEmpty(name))
 						name = Guid.NewGuid().ToString("N");
 
-					//Route route = new Route(url, new MvcContrib.Routing.DebugRouteHandler()) {
-					var route = new Route(url, new MvcRouteHandler()) {
+					var route = new ApacheRoute(url, flags, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
 						Constraints = new RouteValueDictionary(constraints),
 						DataTokens = new RouteValueDictionary(dataTokens)
@@ -74,12 +77,39 @@ namespace ManagedFusion.Rewriter.Contrib
 						route.DataTokens["UseNamespaceFallback"] = useNamespaceFallback;
 					}
 
-					routes.Add(name, route);
+					groupRoutes.Add(name, route);
 
 					areaName = null;
 					defaults.Clear();
 					constraints.Clear();
 					namespaces.Clear();
+				}
+				else if (RouteGroupLine.IsMatch(line))
+				{
+					Match match = RouteGroupLine.Match(line);
+					string pattern = match.Groups["pattern"].Value;
+					string name = match.Groups["name"].Value;
+
+					if (String.IsNullOrEmpty(name))
+						name = Guid.NewGuid().ToString("N");
+
+					RegexOptions patternOptions = Manager.RuleOptions;
+					IConditionFlagProcessor flags;
+
+					if (match.Groups["flags"] != null)
+						flags = SplitConditionFlags(match.Groups["flags"].Value);
+					else
+						flags = new ConditionFlagProcessor();
+
+					// check to see if the pattern should ignore the case when testing
+					if (ConditionFlagsProcessor.HasNoCase(flags))
+						patternOptions |= RegexOptions.IgnoreCase;
+
+					var route = new ApacheGroupRoute(pattern, patternOptions, groupRoutes);
+
+					routes.Add(name, route);
+
+					groupRoutes = new RouteCollection();
 				}
 				else if (RouteIgnoreUrlLine.IsMatch(line))
 				{
@@ -140,6 +170,10 @@ namespace ManagedFusion.Rewriter.Contrib
 					unknownLines.Add(line);
 				}
 			}
+
+			// add all routes that weren't part of a group to the route table
+			foreach (var route in groupRoutes)
+				routes.Add(route);
 
 			lines = unknownLines;
 		}
