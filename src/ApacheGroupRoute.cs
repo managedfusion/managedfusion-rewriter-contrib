@@ -67,8 +67,18 @@ namespace ManagedFusion.Rewriter.Contrib
 		{
 			string routeName = GetRouteName(values);
 
-			var virtualPath = ChildRoutes.GetVirtualPath(requestContext, routeName, WithoutRouteName(values));
-			return virtualPath;
+			var data = ChildRoutes.GetVirtualPath(requestContext, routeName, WithoutRouteName(values));
+
+			if (data == null)
+				return null;
+
+			if (!Pattern.IsMatch(data.VirtualPath))
+				return null;
+
+			if (data.VirtualPath.StartsWith("/"))
+				data.VirtualPath = data.VirtualPath.Substring(1);
+
+			return data;
 		}
 	}
 }
