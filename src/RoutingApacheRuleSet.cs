@@ -20,7 +20,9 @@ namespace ManagedFusion.Rewriter.Contrib
 		private static readonly Regex RouteIgnoreUrlLine = new Regex(@"^RouteIgnoreUrl[\s]+(?<url>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteAreaLine = new Regex(@"^RouteArea[\s]+(?<area>[\S]+)[\s]*", FileOptions);
 		private static readonly Regex RouteDataTokenLine = new Regex(@"^RouteDataToken[\s]+(?<name>[\S]+)[\s]+(?<value>[\S]+)[\s]*", FileOptions);
-		private static readonly Regex RouteGroupLine = new Regex(@"^RouteGroup[\s]+(?<pattern>[\S]+)([\s]+""(?<name>[\S]+)"")?[\s]*(\[(?<flags>[\s\w][^\]]*)\])?", FileOptions);
+
+		private static readonly Regex RouteGroupAreaLine = new Regex(@"^RouteGroupArea[\s]+(?<area>[\S]+)[\s]*", FileOptions);
+		private static readonly Regex RouteGroupLine = new Regex(@"^RouteGroup[\s]+(?<pattern>[\S]+)[\s]*(\[(?<flags>[\s\w][^\]]*)\])?", FileOptions);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoutingApacheRuleSet"/> class.
@@ -38,6 +40,7 @@ namespace ManagedFusion.Rewriter.Contrib
 			// TODO: find a way to remove just the routes from the current ruleset not all of them
 			routes.Clear();
 
+			string groupAreaName = null;
 			string areaName = null;
 			IList<string> unknownLines = new List<string>();
 			IDictionary<string, object> defaults = new Dictionary<string, object>();
@@ -54,9 +57,6 @@ namespace ManagedFusion.Rewriter.Contrib
 					string url = match.Groups["url"].Value;
 					string name = match.Groups["name"].Value;
 					string[] flags = (match.Groups["flags"].Value ?? "").Split(',').Select(x => x.Trim()).ToArray();
-
-					if (String.IsNullOrEmpty(name))
-						name = Guid.NewGuid().ToString("N");
 
 					var route = new ApacheRoute(url, flags, new MvcRouteHandler()) {
 						Defaults = new RouteValueDictionary(defaults),
@@ -77,7 +77,10 @@ namespace ManagedFusion.Rewriter.Contrib
 						route.DataTokens["UseNamespaceFallback"] = useNamespaceFallback;
 					}
 
-					groupRoutes.Add(name, route);
+					if (String.IsNullOrEmpty(name))
+						groupRoutes.Add(route);
+					else
+						groupRoutes.Add(name, route);
 
 					areaName = null;
 					defaults.Clear();
@@ -88,10 +91,6 @@ namespace ManagedFusion.Rewriter.Contrib
 				{
 					Match match = RouteGroupLine.Match(line);
 					string pattern = match.Groups["pattern"].Value;
-					string name = match.Groups["name"].Value;
-
-					if (String.IsNullOrEmpty(name))
-						name = Guid.NewGuid().ToString("N");
 
 					RegexOptions patternOptions = Manager.RuleOptions;
 					IConditionFlagProcessor flags;
@@ -105,10 +104,11 @@ namespace ManagedFusion.Rewriter.Contrib
 					if (ConditionFlagsProcessor.HasNoCase(flags))
 						patternOptions |= RegexOptions.IgnoreCase;
 
-					var route = new ApacheGroupRoute(pattern, patternOptions, groupRoutes);
+					var route = new ApacheGroupRoute(pattern, patternOptions, groupRoutes, groupAreaName);
 
-					routes.Add(name, route);
+					routes.Add(route);
 
+					groupAreaName = null;
 					groupRoutes = new RouteCollection();
 				}
 				else if (RouteIgnoreUrlLine.IsMatch(line))
@@ -164,6 +164,11 @@ namespace ManagedFusion.Rewriter.Contrib
 				{
 					Match match = RouteAreaLine.Match(line);
 					areaName = match.Groups["area"].Value;
+				}
+				else if (RouteGroupAreaLine.IsMatch(line))
+				{
+					Match match = RouteGroupAreaLine.Match(line);
+					groupAreaName = match.Groups["area"].Value;
 				}
 				else
 				{

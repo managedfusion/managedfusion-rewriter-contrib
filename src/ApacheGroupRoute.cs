@@ -2,22 +2,34 @@
 using System.Web;
 using System.Web.Routing;
 using System.Text.RegularExpressions;
+using System.Web.Mvc;
 
 namespace ManagedFusion.Rewriter.Contrib
 {
 	/// <see href="http://routemagic.codeplex.com"/>
-	public class ApacheGroupRoute : RouteBase
+	public class ApacheGroupRoute : RouteBase, IRouteWithArea
 	{
 		private const string RouteNameKey = "__RouteName";
 
-		public ApacheGroupRoute(string pattern, RegexOptions options, RouteCollection childRoutes)
-			: this(new Pattern(pattern, options), childRoutes) { }
+		public ApacheGroupRoute(string pattern, RegexOptions options, RouteCollection childRoutes, string areaName = null)
+			: this(new Pattern(pattern, options), childRoutes, areaName) { }
 
-		public ApacheGroupRoute(Pattern pattern, RouteCollection childRoutes)
+		public ApacheGroupRoute(Pattern pattern, RouteCollection childRoutes, string areaName = null)
 		{
 			Pattern = pattern;
 			ChildRoutes = childRoutes;
+			Area = areaName;
 		}
+
+		#region IRouteWithArea Members
+
+		public string Area
+		{
+			get;
+			private set;
+		}
+
+		#endregion
 
 		public Pattern Pattern
 		{
