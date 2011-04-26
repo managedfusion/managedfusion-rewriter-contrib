@@ -21,8 +21,8 @@
 			<frameworkAssembly assemblyName="System.Web" targetFramework="net40" />
 			<frameworkAssembly assemblyName="System.Web.Mvc" targetFramework="net40" />
 		</frameworkAssemblies>
-		<files>
-			<file src="..\nuget\content\*.*" target="content" />
-		</files>
 	</metadata>
+	<files>
+		<file src="..\nuget\content\*.*" target="content" />
+	</files>
 </package>
