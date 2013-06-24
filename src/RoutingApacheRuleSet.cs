@@ -30,7 +30,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		/// <param name="physicalBase">The physical base.</param>
 		/// <param name="ruleSetFile">The rule set file.</param>
 		public RoutingApacheRuleSet(string physicalBase, FileInfo ruleSetFile)
-			: base(physicalBase, ruleSetFile) { }
+			: base(physicalBase, ruleSetFile) {}
 
 		protected override void RefreshUnknownLines(ref IList<string> lines)
 		{
@@ -47,28 +47,25 @@ namespace ManagedFusion.Rewriter.Contrib
 			IDictionary<string, object> constraints = new Dictionary<string, object>();
 			IDictionary<string, object> dataTokens = new Dictionary<string, object>();
 			IList<string> namespaces = new List<string>();
-			RouteCollection groupRoutes = new RouteCollection();
+			var groupRoutes = new RouteCollection();
 
-			foreach (var line in lines)
-			{
-				if (RouteUrlLine.IsMatch(line))
-				{
+			foreach (var line in lines) {
+				if (RouteUrlLine.IsMatch(line)) {
 					Match match = RouteUrlLine.Match(line);
 					string url = match.Groups["url"].Value;
 					string name = match.Groups["name"].Value;
 					string[] flags = (match.Groups["flags"].Value ?? "").Split(',').Select(x => x.Trim()).ToArray();
 
-					var route = new ApacheRoute(url, flags, new MvcRouteHandler()) {
-						Defaults = new RouteValueDictionary(defaults),
-						Constraints = new RouteValueDictionary(constraints),
-						DataTokens = new RouteValueDictionary(dataTokens)
-					};
+					var defaultsDictionary = new RouteValueDictionary(defaults);
+					var constraintsDictionary = new RouteValueDictionary(constraints);
+					var dataTokensDictionary = new RouteValueDictionary(dataTokens);
+
+					var route = new ApacheRoute(url, flags, defaultsDictionary, constraintsDictionary, dataTokensDictionary, new MvcRouteHandler());
 
 					if (namespaces.Count > 0)
 						route.DataTokens["Namespaces"] = namespaces.ToArray();
 
-					if (areaName != null && areaName.Trim().Length > 0)
-					{
+					if (areaName != null && areaName.Trim().Length > 0) {
 						route.DataTokens["area"] = areaName;
 
 						// disabling the namespace lookup fallback mechanism keeps this areas from accidentally picking up
@@ -86,19 +83,13 @@ namespace ManagedFusion.Rewriter.Contrib
 					defaults.Clear();
 					constraints.Clear();
 					namespaces.Clear();
-				}
-				else if (RouteGroupLine.IsMatch(line))
-				{
+				} else if (RouteGroupLine.IsMatch(line)) {
 					Match match = RouteGroupLine.Match(line);
 					string pattern = match.Groups["pattern"].Value;
 
 					RegexOptions patternOptions = Manager.RuleOptions;
-					IConditionFlagProcessor flags;
 
-					if (match.Groups["flags"] != null)
-						flags = SplitConditionFlags(match.Groups["flags"].Value);
-					else
-						flags = new ConditionFlagProcessor();
+					var flags = match.Groups["flags"] != null ? SplitConditionFlags(match.Groups["flags"].Value) : new ConditionFlagProcessor();
 
 					// check to see if the pattern should ignore the case when testing
 					if (ConditionFlagsProcessor.HasNoCase(flags))
@@ -110,9 +101,7 @@ namespace ManagedFusion.Rewriter.Contrib
 
 					groupAreaName = null;
 					groupRoutes = new RouteCollection();
-				}
-				else if (RouteIgnoreUrlLine.IsMatch(line))
-				{
+				} else if (RouteIgnoreUrlLine.IsMatch(line)) {
 					Match match = RouteIgnoreUrlLine.Match(line);
 					string url = match.Groups["url"].Value;
 
@@ -125,53 +114,39 @@ namespace ManagedFusion.Rewriter.Contrib
 					defaults.Clear();
 					constraints.Clear();
 					namespaces.Clear();
-				}
-				else if (RouteDefaultLine.IsMatch(line))
-				{
+				} else if (RouteDefaultLine.IsMatch(line)) {
 					Match match = RouteDefaultLine.Match(line);
 					string name = match.Groups["name"].Value;
 					object value = match.Groups["value"].Value;
 
-					if (String.Equals(value, "?"))
+					if ((string)value == "?")
 						value = UrlParameter.Optional;
 
 					defaults.Add(name, value);
-				}
-				else if (RouteConstraintLine.IsMatch(line))
-				{
+				} else if (RouteConstraintLine.IsMatch(line)) {
 					Match match = RouteConstraintLine.Match(line);
 					string name = match.Groups["name"].Value;
 					string value = match.Groups["value"].Value;
 
 					constraints.Add(name, value);
-				}
-				else if (RouteDataTokenLine.IsMatch(line))
-				{
+				} else if (RouteDataTokenLine.IsMatch(line)) {
 					Match match = RouteDataTokenLine.Match(line);
 					string name = match.Groups["name"].Value;
 					string value = match.Groups["value"].Value;
 
 					dataTokens.Add(name, value);
-				}
-				else if (RouteNamespaceLine.IsMatch(line))
-				{
+				} else if (RouteNamespaceLine.IsMatch(line)) {
 					Match match = RouteNamespaceLine.Match(line);
 					string ns = match.Groups["namespace"].Value;
 
 					namespaces.Add(ns);
-				}
-				else if (RouteAreaLine.IsMatch(line))
-				{
+				} else if (RouteAreaLine.IsMatch(line)) {
 					Match match = RouteAreaLine.Match(line);
 					areaName = match.Groups["area"].Value;
-				}
-				else if (RouteGroupAreaLine.IsMatch(line))
-				{
+				} else if (RouteGroupAreaLine.IsMatch(line)) {
 					Match match = RouteGroupAreaLine.Match(line);
 					groupAreaName = match.Groups["area"].Value;
-				}
-				else
-				{
+				} else {
 					unknownLines.Add(line);
 				}
 			}
@@ -186,7 +161,7 @@ namespace ManagedFusion.Rewriter.Contrib
 		private sealed class IgnoreRouteInternal : Route
 		{
 			public IgnoreRouteInternal(string url)
-				: base(url, new StopRoutingHandler()) { }
+				: base(url, new StopRoutingHandler()) {}
 
 			public override VirtualPathData GetVirtualPath(RequestContext requestContext, RouteValueDictionary routeValues)
 			{

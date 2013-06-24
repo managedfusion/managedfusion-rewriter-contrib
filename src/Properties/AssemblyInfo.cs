@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Managed Fusion URL Rewriter and Reverse Proxy is a powerful URL manipulation engine based on the Apache mod_rewrite extension.")]
 [assembly: AssemblyProduct("ManagedFusion.Rewriter.Contrib")]
 [assembly: AssemblyCompany("Managed Fusion, LLC")]
-[assembly: AssemblyCopyright("Copyright © Nick Berardi, Managed Fusion, LLC 2011")]
+[assembly: AssemblyCopyright("Copyright © Nick Berardi, Managed Fusion, LLC 2013")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

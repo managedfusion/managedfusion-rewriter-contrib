@@ -22,15 +22,15 @@ namespace ManagedFusion.Rewriter.Contrib
 			httpContext.Items[HttpContextLogWrittenName] = true;
 		}
 
-		public ApacheRoute(string url, string[] flags, IRouteHandler routeHandler)
-			: base(url, routeHandler)
+		public ApacheRoute(string url, IEnumerable<string> flags, RouteValueDictionary defaults, RouteValueDictionary constraints, RouteValueDictionary dataTokens, IRouteHandler routeHandler)
+			: base(url, defaults, constraints, dataTokens, routeHandler)
 		{
 			_flags = flags.Select(x => x.ToUpperInvariant()).ToList().AsReadOnly();
 		}
 
 		public override RouteData GetRouteData(HttpContextBase httpContext)
 		{
-			ApacheRoute.WriteUrlToLog(httpContext);
+			WriteUrlToLog(httpContext);
 	
 			var routeData = base.GetRouteData(httpContext);
 

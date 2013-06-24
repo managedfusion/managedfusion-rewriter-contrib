@@ -1,8 +1,7 @@
 ﻿﻿using System;
 using System.Web;
 using System.Web.Routing;
-using System.Text.RegularExpressions;
-using System.Web.Mvc;
+using System.Text.RegularExpressions;using System.Web.Mvc;
 
 namespace ManagedFusion.Rewriter.Contrib
 {
@@ -48,7 +47,7 @@ namespace ManagedFusion.Rewriter.Contrib
 			if (routeValues == null)
 				return null;
 
-			object routeName = null;
+			object routeName;
 			routeValues.TryGetValue(RouteNameKey, out routeName);
 			return routeName as string;
 		}
